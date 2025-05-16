@@ -48,11 +48,10 @@ async def init_process():
     global G_proc
 
     G_proc = await asyncio.create_subprocess_exec(
-        "/bin/bash", #"-i",
-            # "/usr/bin/dotnet",
-            # "vintagestory/VintageStoryServer.dll",
-            # "--dataDir", 
-            # C_DATA_DIR,
+            "/usr/bin/dotnet",
+            "vintagestory/VintageStoryServer.dll",
+            "--dataDir", 
+            C_DATA_DIR,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
@@ -100,6 +99,7 @@ async def main():
        
 
     await res
+    await handle_exit()
 
 
 if __name__ == "__main__":
