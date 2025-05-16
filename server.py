@@ -15,9 +15,11 @@ SERVER_START_MSG = "Dedicated Server now running"
 
 
 async def _autosave_async():
-    send_command(G_proc, b"hi")
+    global G_proc
+    await send_command(G_proc, b"hi")
     
 def autosave():
+    global G_server_ready
     if not G_server_ready:
         return
     asyncio.run(_autosave_async())
