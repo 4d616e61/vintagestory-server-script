@@ -42,11 +42,11 @@ async def _read_stream(stream, cb):
             line = line.decode()
         except:
             break
-        if line:
-            for c in cb:
-                c(line)
-        else:
+        if not line:
             break
+
+        for c in cb:
+            c(line)
 
 async def init_process():
     global G_proc
@@ -62,16 +62,19 @@ async def init_process():
 
     return G_proc
 
-
-async def setup_streams(process):
-    return await asyncio.gather(
+#whoever made this example i HATE you
+def setup_streams(process):
+    return asyncio.gather(
         _read_stream(process.stdout, [check_ready_line, log_line]),
         _read_stream(process.stderr, [check_ready_line, log_line])
     )
 
 
 async def handle_exit():
-    G_proc.terminate()
+    try:
+        G_proc.terminate()
+    except:
+        pass
     
 
 def setup_signal():
@@ -82,22 +85,25 @@ def setup_signal():
 
 
 async def send_command(proc, line):
-    proc.stdin.write(line)
+    proc.stdin.write(line + b"\n")
     await proc.stdin.drain()
     return
+
 async def main():
     global G_proc
     setup_signal()
     proc = await init_process()
     res = setup_streams(proc)
-
+    proc.stdin.write(b'ls \n')
     while True:
-        line = await aioconsole.ainput()
-        print("got line")
-        print(line)
-        #line = line.decode()
-        if not line:
+        try:
+            line = await aioconsole.ainput()
+            line = line.encode()
+        except EOFError:
+            print("eof")
             break
+        if not line:
+            continue
         await send_command(G_proc, line)
        
 
