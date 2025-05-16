@@ -108,8 +108,8 @@ async def forward_input_loop():
 
 async def _autosave_async():
     global G_proc
-    print('talk')
-    await send_command(G_proc, b"hi")
+    await send_command(G_proc, b"backing up")
+    await send_command(G_proc, b"/genbackup")
     
 def autosave():
     global G_server_ready
@@ -120,7 +120,7 @@ def autosave():
     
 
 
-schedule.every(1).seconds.do(autosave)
+schedule.every(C_AUTOSAVE_INTERVAL_MINS).minutes.do(autosave)
 
 
 async def main():
