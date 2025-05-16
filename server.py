@@ -14,21 +14,6 @@ G_server_ready = False
 SERVER_START_MSG = "Dedicated Server now running"
 
 
-async def _autosave_async():
-    global G_proc
-    print('talk')
-    await send_command(G_proc, b"hi")
-    
-def autosave():
-    global G_server_ready
-    if not G_server_ready:
-        return
-    asyncio.run(_autosave_async())
-
-
-
-schedule.every(C_AUTOSAVE_INTERVAL_MINS).seconds.do(autosave)
-
 
 def check_ready_line(line):
     global G_server_ready
@@ -59,15 +44,22 @@ async def init_process():
     global G_proc
 
     G_proc = await asyncio.create_subprocess_exec(
-            "./vintagestory/VintagestoryServer",
-            "--dataPath", 
-            C_DATA_DIR,
+        "/bin/bash",
+            # "./vintagestory/VintagestoryServer",
+            # "--dataPath", 
+            # C_DATA_DIR,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
     )
 
     return G_proc
+
+async def send_command(proc, line):
+    proc.stdin.write(line + b"\n")
+    await proc.stdin.drain()
+    return
+
 
 #whoever made this example i HATE you
 def setup_streams(process):
@@ -81,16 +73,12 @@ async def handle_exit():
     try:
         G_proc.terminate()
     except:
+        print("Failed to kill subprocess. Manual intervention may be required.")
+        print(f"kill {G_proc.pid}")
         pass
     
 
-async def run_peding():
-    while True:
-        try:
-            schedule.run_pending()
-        except:
-            return
-        asyncio.sleep(100)
+
 
 def setup_signal():
     loop = asyncio.get_event_loop()
@@ -98,33 +86,59 @@ def setup_signal():
         loop.add_signal_handler(getattr(signal, signame),
                                 lambda: asyncio.create_task(handle_exit()))
 
+async def run_peding_loop():
+    while True:
+        try:
+            schedule.run_pending()
+            await asyncio.sleep(0.1)
+        except:
+            return
 
-async def send_command(proc, line):
-    proc.stdin.write(line + b"\n")
-    await proc.stdin.drain()
-    return
-
-async def main():
-    global G_proc
-    setup_signal()
-    proc = await init_process()
-    res = setup_streams(proc)
-    res2 = run_peding()
-
+async def forward_input_loop():
     while True:
         try:
             line = await aioconsole.ainput()
             line = line.encode()
         except EOFError:
-            print("eof")
             break
         if not line:
             continue
         await send_command(G_proc, line)
+
+
+
+async def _autosave_async():
+    global G_proc
+    print('talk')
+    await send_command(G_proc, b"hi")
+    
+def autosave():
+    global G_server_ready
+    if not G_server_ready:
+        return
+    event_loop = asyncio.get_event_loop()
+    asyncio.ensure_future(_autosave_async(), loop=event_loop)
+    
+
+
+schedule.every(1).seconds.do(autosave)
+
+
+async def main():
+    global G_proc
+    global G_server_ready
+    setup_signal()
+    proc = await init_process()
+    res = setup_streams(proc)
+    res2 = asyncio.create_task(run_peding_loop())
+    res3 = asyncio.create_task(forward_input_loop())
+    
        
 
     await res
-    await res2
+
+    res2.cancel()
+    res3.cancel()
     await handle_exit()
 
 
