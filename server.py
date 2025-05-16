@@ -31,7 +31,8 @@ def check_ready_line(line):
         
 
 def log_line(line):
-    line_txt =line.decode().rstrip("\n")
+    #line_txt = line.decode().rstrip("\n")
+    line_txt = line
     print(f"[SERVER]{line_txt}")
 
 #https://stackoverflow.com/questions/65649412/getting-live-output-from-asyncio-subprocess
