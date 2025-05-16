@@ -30,6 +30,10 @@ def check_ready_line(line):
         G_server_ready = True
         
 
+def log_line(line):
+    line_txt =line.decode().rstrip("\n")
+    print(f"[SERVER]{line_txt}")
+
 #https://stackoverflow.com/questions/65649412/getting-live-output-from-asyncio-subprocess
 async def _read_stream(stream, cb):  
     while True:
@@ -61,8 +65,8 @@ async def init_process():
 
 async def setup_streams(process):
     return await asyncio.gather(
-        _read_stream(process.stdout, [check_ready_line, sys.stdout.write]),
-        _read_stream(process.stderr, [check_ready_line, sys.stdout.write])
+        _read_stream(process.stdout, [check_ready_line, log_line]),
+        _read_stream(process.stderr, [check_ready_line, log_line])
     )
 
 
