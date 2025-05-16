@@ -1,9 +1,9 @@
-from re import L
 import subprocess
 import asyncio
 from cfg import *
 import sys
 import signal
+import aioconsole
 
 G_proc : asyncio.subprocess.Process = None
 G_server_ready = False
@@ -86,10 +86,9 @@ async def main():
     setup_signal()
     proc = await init_process()
     res = setup_streams(proc)
-    #reader, writer = await connect_stdin_stdout()
-    reader = asyncio.StreamReader(sys.stdin)
+
     while True:
-        line = await reader.readline()
+        line = await aioconsole.ainput()
         print("got line")
         print(line)
         #line = line.decode()
