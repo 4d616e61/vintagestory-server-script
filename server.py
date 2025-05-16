@@ -86,7 +86,8 @@ async def main():
     setup_signal()
     proc = await init_process()
     res = setup_streams(proc)
-    reader, writer = await connect_stdin_stdout()
+    #reader, writer = await connect_stdin_stdout()
+    reader = asyncio.StreamReader(sys.stdin)
     while True:
         line = await reader.readline()
         print("got line")
