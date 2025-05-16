@@ -16,6 +16,7 @@ SERVER_START_MSG = "Dedicated Server now running"
 
 async def _autosave_async():
     global G_proc
+    print('talk')
     await send_command(G_proc, b"hi")
     
 def autosave():
@@ -83,6 +84,14 @@ async def handle_exit():
         pass
     
 
+async def run_peding():
+    while True:
+        try:
+            schedule.run_pending()
+        except:
+            return
+        asyncio.sleep(100)
+
 def setup_signal():
     loop = asyncio.get_event_loop()
     for signame in ('SIGINT', 'SIGTERM'):
@@ -100,7 +109,8 @@ async def main():
     setup_signal()
     proc = await init_process()
     res = setup_streams(proc)
-    proc.stdin.write(b'ls \n')
+    res2 = run_peding()
+
     while True:
         try:
             line = await aioconsole.ainput()
@@ -114,6 +124,7 @@ async def main():
        
 
     await res
+    await res2
     await handle_exit()
 
 
