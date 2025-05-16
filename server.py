@@ -4,6 +4,7 @@ from cfg import *
 import sys
 import signal
 import aioconsole
+import schedule
 
 G_proc : asyncio.subprocess.Process = None
 G_server_ready = False
@@ -12,6 +13,18 @@ G_server_ready = False
 #15.5.2025 18:28:33 [Server Event] Dedicated Server now running on Port 42420 and all ips!
 SERVER_START_MSG = "Dedicated Server now running"
 
+
+async def _autosave_async():
+    send_command(G_proc, b"hi")
+    
+def autosave():
+    if not G_server_ready:
+        return
+    asyncio.run(_autosave_async())
+
+
+
+schedule.every(C_AUTOSAVE_INTERVAL_MINS).seconds.do(autosave)
 
 
 def check_ready_line(line):
