@@ -48,7 +48,7 @@ async def init_process():
     global G_proc
 
     G_proc = await asyncio.create_subprocess_exec(
-            "./vintagestory/VintageStoryServer",
+            "./vintagestory/VintagestoryServer",
             "--dataPath", 
             C_DATA_DIR,
             stdin=subprocess.PIPE,
