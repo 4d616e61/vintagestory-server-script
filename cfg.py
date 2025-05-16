@@ -1,0 +1,1 @@
+C_DATA_DIR = "/var/vintagestory/data"
