@@ -12,15 +12,6 @@ G_server_ready = False
 #15.5.2025 18:28:33 [Server Event] Dedicated Server now running on Port 42420 and all ips!
 SERVER_START_MSG = "Dedicated Server now running"
 
-#https://stackoverflow.com/questions/64303607/python-asyncio-how-to-read-stdin-and-write-to-stdout
-async def connect_stdin_stdout():
-    loop = asyncio.get_event_loop()
-    reader = asyncio.StreamReader()
-    protocol = asyncio.StreamReaderProtocol(reader)
-    await loop.connect_read_pipe(lambda: protocol, sys.stdin)
-    # w_transport, w_protocol = await loop.connect_write_pipe(asyncio.streams.FlowControlMixin, sys.stdout)
-    # writer = asyncio.StreamWriter(w_transport, w_protocol, reader, loop)
-    return reader, None
 
 
 def check_ready_line(line):
@@ -32,7 +23,7 @@ def check_ready_line(line):
 
 def log_line(line):
     line_txt = line.rstrip("\n")
-    print(f"[SERVER]{line_txt}")
+    print(f"{line_txt}")
 
 #https://stackoverflow.com/questions/65649412/getting-live-output-from-asyncio-subprocess
 async def _read_stream(stream, cb):  
